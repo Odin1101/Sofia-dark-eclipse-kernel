@@ -19,6 +19,9 @@
 #include <linux/of_gpio.h>
 #include <linux/pwm.h>
 #include <video/mipi_display.h>
+#ifdef CONFIG_STATE_NOTIFIER
+#include <linux/state_notifier.h>
+#endif
 
 #include "dsi_panel.h"
 #include "dsi_ctrl_hw.h"
@@ -635,6 +638,10 @@ error_disable_vregs:
 	(void)dsi_pwr_enable_regulator(&panel->power_info, false);
 
 exit:
+#ifdef CONFIG_STATE_NOTIFIER
+	state_resume();
+#endif
+
 	return rc;
 }
 
@@ -675,6 +682,10 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 		if (rc)
 			pr_err("[%s] failed to enable vregs, rc=%d\n", panel->name, rc);
 	}
+
+#ifdef CONFIG_STATE_NOTIFIER
+	state_suspend();
+#endif
 
 	return rc;
 }
